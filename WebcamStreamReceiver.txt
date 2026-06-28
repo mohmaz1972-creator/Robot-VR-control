@@ -1,0 +1,97 @@
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class WebcamStreamReceiver : MonoBehaviour
+{
+    [Header("Network Settings")]
+    public int port = 5006; // Port to receive webcam frames from Python (matches UNITY_VIDEO_PORT)
+
+    private UdpClient udpClient;
+    private Thread receiveThread;
+    private Texture2D webcamTexture;
+    private RawImage rawImageComponent;
+    private MeshRenderer meshRendererComponent;
+    
+    private byte[] latestFrameBytes = null;
+    private bool isFrameReceived = false;
+    private readonly object lockObject = new object();
+
+    void Start()
+    {
+        rawImageComponent = GetComponent<RawImage>();
+        meshRendererComponent = GetComponent<MeshRenderer>();
+
+        // Create initial texture setup
+        webcamTexture = new Texture2D(2, 2);
+        
+        if (rawImageComponent != null) rawImageComponent.texture = webcamTexture;
+        if (meshRendererComponent != null) meshRendererComponent.material.mainTexture = webcamTexture;
+
+        // Initialize background thread to prevent VR headset stuttering or lagging
+        udpClient = new UdpClient(port);
+        receiveThread = new Thread(new ThreadStart(ReceiveData));
+        receiveThread.IsBackground = true;
+        receiveThread.Start();
+        
+        Debug.Log("Unity Webcam Receiver Started on Port: " + port);
+    }
+
+    void ReceiveData()
+    {
+        IPEndPoint anyIP = new IPEndPoint(IPAddress.Any, port);
+        while (Thread.CurrentThread.IsBackground)
+        {
+            try
+            {
+                byte[] data = udpClient.Receive(ref anyIP);
+                if (data != null && data.Length > 0)
+                {
+                    lock (lockObject)
+                    {
+                        latestFrameBytes = data;
+                        isFrameReceived = true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("UDP Receive Error: " + e.Message);
+            }
+        }
+    }
+
+    void Update()
+    {
+        // Render the newly received frame on Unity's Main Thread
+        if (isFrameReceived)
+        {
+            byte[] imageToLoad = null;
+            lock (lockObject)
+            {
+                imageToLoad = latestFrameBytes;
+                isFrameReceived = false;
+            }
+
+            if (imageToLoad != null)
+            {
+                webcamTexture.LoadImage(imageToLoad); // Automatically decodes raw JPG data at high speed
+            }
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (receiveThread != null && receiveThread.IsAlive) receiveThread.Abort();
+        if (udpClient != null) udpClient.Close();
+    }
+    
+    void OnApplicationQuit()
+    {
+        if (receiveThread != null && receiveThread.IsAlive) receiveThread.Abort();
+        if (udpClient != null) udpClient.Close();
+    }
+}
