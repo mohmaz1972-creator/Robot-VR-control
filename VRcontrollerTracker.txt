@@ -1,0 +1,109 @@
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.XR;
+
+public class VRControllerTracker : MonoBehaviour
+{
+    [Header("Network Settings")]
+    public string pythonIP = "127.0.0.1"; 
+    public int pythonPort = 5005; // Matches the UDP_IN_PORT in rtcv.py
+
+    [Header("Movement Settings")]
+    public float scaleFactor = 1000f; 
+    public float minThreshold = 0.005f; // Minimum 5mm displacement required to send data
+    public float sendInterval = 0.1f;   // Send data every 100ms (10 times/sec) to prevent robot crashes
+
+    private UdpClient udpClient;
+    private IPEndPoint remoteEndPoint;
+    private InputDevice rightController;
+    
+    private bool isGripPressedLastFrame = false;
+    private Vector3 lastPosition;
+    private float nextSendTime = 0f;
+
+    void Start()
+    {
+        udpClient = new UdpClient();
+        remoteEndPoint = new IPEndPoint(IPAddress.Parse(pythonIP), pythonPort);
+        InitializeController();
+    }
+
+    void InitializeController()
+    {
+        var devices = new List<InputDevice>();
+        InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.Right | InputDeviceCharacteristics.Controller, devices);
+        if (devices.Count > 0)
+        {
+            rightController = devices[0];
+            Debug.Log("[VR] Right Controller Found and Connected!");
+        }
+    }
+
+    void Update()
+    {
+        if (!rightController.isValid)
+        {
+            InitializeController();
+            return;
+        }
+
+        // Debug Test: Check if the Grip button is pressed
+        if (rightController.TryGetFeatureValue(CommonUsages.grip, out float gripValue))
+        {
+            if (gripValue > 0.5f)
+            {
+                if (rightController.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 currentPosition))
+                {
+                    if (isGripPressedLastFrame)
+                    {
+                        // Apply time interval limits to reduce network traffic
+                        if (Time.time >= nextSendTime)
+                        {
+                            Vector3 delta = currentPosition - lastPosition;
+
+                            if (delta.magnitude > minThreshold)
+                            {
+                                float dx = delta.z * scaleFactor;      
+                                float dy = -delta.x * scaleFactor;     
+                                float dz = delta.y * scaleFactor;      
+
+                                string message = $"{dx:F2},{dy:F2},{dz:F2}";
+                                byte[] data = Encoding.UTF8.GetBytes(message);
+                                
+                                udpClient.Send(data, data.Length, remoteEndPoint);
+                                Debug.Log($"[VR] Sent to Python: {message}"); // Confirm transmission in Unity console
+                                
+                                lastPosition = currentPosition; // Update only after a confirmed movement
+                                nextSendTime = Time.time + sendInterval;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // First frame of pressing the Grip button
+                        lastPosition = currentPosition;
+                        isGripPressedLastFrame = true;
+                        Debug.Log("[VR] Grip Started Holding...");
+                    }
+                }
+            }
+            else
+            {
+                if (isGripPressedLastFrame)
+                {
+                    Debug.Log("[VR] Grip Released.");
+                }
+                isGripPressedLastFrame = false;
+            }
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (udpClient != null) udpClient.Close();
+    }
+}
