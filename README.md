@@ -17,7 +17,7 @@ An advanced, multithreaded cyber-physical system built to establish real-time te
 ---
 
 ## 🏗️ Repository Architecture
-
+~~~
 The repository archives the progressive evolution of the project's development across distinct logical layers:
 
 
@@ -32,7 +32,7 @@ The repository archives the progressive evolution of the project's development a
 ├── c3.py                        # UDP listener loop for Quest 3 controller packet parsing
 ├── c4.py                        # MediaPipe pipeline execution and frame-buffer streaming to Unity
 └── c5.py                        # Vosk speech processing engine and finalized multithreaded robot controller
-
+~~~
 
 ⚙️ Configuration & Installation
   1. Unity Environment Setup
