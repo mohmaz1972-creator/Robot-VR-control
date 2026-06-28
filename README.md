@@ -20,7 +20,7 @@ An advanced, multithreaded cyber-physical system built to establish real-time te
 
 The repository archives the progressive evolution of the project's development across distinct logical layers:
 
-```text
+
 ├── Unity_Project/                # Immersive XR Environment
 │   ├── SampleScene.unity        # Main virtual reality control layout
 │   ├── VRControllerTracker.cs  # Extracts Quest 3 tracking data and dispatches to Python
@@ -32,3 +32,24 @@ The repository archives the progressive evolution of the project's development a
 ├── c3.py                        # UDP listener loop for Quest 3 controller packet parsing
 ├── c4.py                        # MediaPipe pipeline execution and frame-buffer streaming to Unity
 └── c5.py                        # Vosk speech processing engine and finalized multithreaded robot controller
+
+
+⚙️ Configuration & Installation
+  1. Unity Environment Setup
+    Ensure Unity 2022.3 LTS (or newer) is installed with the OpenXR and XR Interaction Toolkit packages enabled.
+    Set the color pipeline to URP (Universal Render Pipeline) to maintain optimal refresh rates inside the Meta Quest 3 headset.
+    Attach VRControllerTracker.cs and WebcamStreamReceiver.cs to your active tracking nodes or display quads within the scene.
+
+ 2. Python Environment Setup
+   Install the necessary dependencies utilizing your terminal:
+         "pip install opencv-python mediapipe vosk numpy"
+   Make sure to download your preferred language model from Vosk and extract it into a folder named "model" in the root directory.
+
+ 3. Execution Sequence
+   1. Run the targeted Python control script (e.g., python c5.py).
+   2. Boot your Meta Quest 3 headset and build/play the Unity project scene.
+   3. Hold the Grip Button on the Right Controller to initialize real-time robot arm teleoperation.
+
+⚠️ Safety Protocols & LimitsDisplacement Thresholds:
+   The Unity scripts enforce a mandatory 0.005f (5mm) minimum translation delta to prevent noise jitter from triggering micro-oscillations in the robot's actuators.
+   Network Rate Limiting: Data is throttled to send every 100ms ($10\text{ Hz}$). Forcing a higher frequency without proper hardware buffers may cause connection overhead or robot safety locks.
