@@ -35,7 +35,7 @@ The repository archives the progressive evolution of the project's development a
 ~~~
 
 📸Final output of the project:
-![Project output in headset control](./images/p3h.gif)
+![Project output in headset control](./p3h.gif)
 ⚙️ Configuration & Installation
   1. Unity Environment Setup
     Ensure Unity 2022.3 LTS (or newer) is installed with the OpenXR and XR Interaction Toolkit packages enabled.
