@@ -34,6 +34,8 @@ The repository archives the progressive evolution of the project's development a
 └── c5.py                        # Vosk speech processing engine and finalized multithreaded robot controller
 ~~~
 
+📸Final output of the project:
+![Project output in headset control](Internalstorage/Pictures/VideoToGif/p3h.gif)
 ⚙️ Configuration & Installation
   1. Unity Environment Setup
     Ensure Unity 2022.3 LTS (or newer) is installed with the OpenXR and XR Interaction Toolkit packages enabled.
