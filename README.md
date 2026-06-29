@@ -35,6 +35,7 @@ The repository archives the progressive evolution of the project's development a
 ~~~
 
 **📸Final output of the project:**
+
  **🥽Project output in headset control**
 ![Project output in headset control](./p3h.gif)
 ✏️Note:In the section on controlling the robot with the headset controller, in the program I wrote, to prevent unwanted movements, the robot moves when the gripper button on the right controller is held down. Also, to return to the starting point, simply press the A button on the right controller.
@@ -68,6 +69,6 @@ The repository archives the progressive evolution of the project's development a
    Network Rate Limiting: Data is throttled to send every 100ms ($10\text{ Hz}$). Forcing a higher frequency without proper hardware buffers may cause connection overhead or robot safety locks.
 
 
-**--------------⭐Appreciation⭐---------------**
-In conclusion, I would like to thank all those who helped me in this project, including **my family** and my dear friend,**Ali Najarzadegan**, without whose help and guidance this project would not have been possible, as well as the** Industry 4.0 Development Laboratory** in Isfahan University of Technology, which provided me with the necessary equipment to carry out this project, and all those who helped me in any way in carrying out this project.
+**-----------⭐Appreciation⭐---------------**
+In conclusion, I would like to thank all those who helped me in this project, including **my family** and my dear friend,**Ali Najarzadegan**, without whose help and guidance this project would not have been possible, as well as the **Industry 4.0 Development Laboratory** in Isfahan University of Technology, which provided me with the necessary equipment to carry out this project, and all those who helped me in any way in carrying out this project.
 **And I dedicate this project to the martyr Dr. Mostafa Chamran, who has been my best role model in life.**
